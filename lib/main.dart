@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
-import 'home_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'home_page.dart';
 
 class ThemePreference {
   static const _themeModeKey = 'theme_mode';
@@ -24,11 +22,8 @@ class ThemePreference {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
-  // Load the saved theme mode
   final themePreference = ThemePreference();
   bool isDarkMode = await themePreference.getThemeMode();
-
   runApp(MyApp(isDarkMode: isDarkMode));
 }
 
@@ -43,7 +38,6 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
   late bool isDarkMode;
-
   @override
   void initState() {
     super.initState();
@@ -68,9 +62,7 @@ class MyAppState extends State<MyApp> {
 
 class SignInPage extends StatefulWidget {
   final Function toggleTheme;
-
   const SignInPage({super.key, required this.toggleTheme});
-
   @override
   SignInPageState createState() => SignInPageState();
 }
@@ -78,7 +70,6 @@ class SignInPage extends StatefulWidget {
 class SignInPageState extends State<SignInPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late User? _user;
-
   @override
   void initState() {
     super.initState();
@@ -100,12 +91,10 @@ class SignInPageState extends State<SignInPage> {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     final GoogleSignInAuthentication googleAuth =
         await googleUser!.authentication;
-
     final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-
     final UserCredential userCredential =
         await _auth.signInWithCredential(credential);
     return userCredential.user;

@@ -14,7 +14,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 class EmployeeTracker extends StatefulWidget {
   final User user;
   final Function toggleTheme;
-
   const EmployeeTracker(
       {super.key, required this.user, required this.toggleTheme});
 
@@ -28,10 +27,8 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
   int totalSum = 0;
   Future<void> _pickAndUploadImage(String employeeId) async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
-
       try {
         final ref = FirebaseStorage.instance
             .ref()
@@ -44,11 +41,8 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
             .collection('employees')
             .doc(employeeId)
             .update({'imageUrl': imageUrl});
-
-        setState(() {}); // Refresh UI
-      } catch (e) {
-        print('Failed to upload image: $e');
-      }
+        setState(() {});
+      } catch (e) {}
     }
   }
 
@@ -84,8 +78,7 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
         .update({
       'workedDays': workedDays,
     });
-
-    setState(() {}); // Rebuild the UI to reflect changes
+    setState(() {});
   }
 
   void _subtractWorkedDays(String employeeId, int daysToSubtract) async {
@@ -97,13 +90,12 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
         .get();
     Map<String, bool> workedDays = Map<String, bool>.from(doc['workedDays']);
     List<String> workedDaysList = workedDays.keys.toList()
-      ..sort((a, b) => a.compareTo(b)); // Sort in ascending order
+      ..sort((a, b) => a.compareTo(b));
 
     for (int i = 0; i < daysToSubtract && workedDaysList.isNotEmpty; i++) {
-      String earliestDay = workedDaysList.removeAt(0); // Remove from the front
+      String earliestDay = workedDaysList.removeAt(0);
       workedDays.remove(earliestDay);
     }
-
     await _firestore
         .collection('users')
         .doc(widget.user.uid)
@@ -112,8 +104,7 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
         .update({
       'workedDays': workedDays,
     });
-
-    setState(() {}); // Rebuild the UI to reflect changes
+    setState(() {});
   }
 
   void _subtractAllWorkedDays(String employeeId) async {
@@ -125,8 +116,7 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
         .update({
       'workedDays': {},
     });
-
-    setState(() {}); // Rebuild the UI to reflect changes
+    setState(() {});
   }
 
   void _deleteEmployee(String employeeId) async {
@@ -136,8 +126,7 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
         .collection('employees')
         .doc(employeeId)
         .delete();
-
-    setState(() {}); // Rebuild the UI to reflect changes
+    setState(() {});
   }
 
   Future<String?> _getImageUrl(String employeeId) async {
@@ -148,7 +137,6 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
       final url = await ref.getDownloadURL();
       return url;
     } catch (e) {
-      print('Failed to get image URL: $e');
       return null;
     }
   }
@@ -157,7 +145,6 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
     final nameController = TextEditingController();
     final wageController = TextEditingController();
     final phoneController = TextEditingController();
-
     showDialog(
       context: context,
       builder: (context) {
@@ -205,7 +192,6 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
     final nameController = TextEditingController(text: currentName);
     final wageController = TextEditingController(text: currentWage.toString());
     final phoneController = TextEditingController(text: currentPhone);
-
     showDialog(
       context: context,
       builder: (context) {
@@ -258,7 +244,6 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
 
   void _showSubtractDaysDialog(String employeeId) {
     final daysController = TextEditingController();
-
     showDialog(
       context: context,
       builder: (context) {
@@ -340,9 +325,7 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
             .snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData) return const CircularProgressIndicator();
-
-          totalSum = 0; // Reset totalSum before calculating
-
+          totalSum = 0;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -353,8 +336,7 @@ class EmployeeTrackerState extends State<EmployeeTracker> {
                         Map<String, bool>.from(doc['workedDays']);
                     int workedDaysCount = workedDays.length;
                     int dailyWage = doc['dailyWage'];
-                    totalSum += dailyWage * workedDaysCount; // Add to totalSum
-
+                    totalSum += dailyWage * workedDaysCount;
                     return FutureBuilder<String?>(
                       future: _getImageUrl(doc.id),
                       builder: (context, imageSnapshot) {
@@ -492,7 +474,6 @@ class CalendarPage extends StatefulWidget {
 class CalendarPageState extends State<CalendarPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late Map<String, bool> _workedDays;
-
   @override
   void initState() {
     super.initState();
@@ -502,13 +483,11 @@ class CalendarPageState extends State<CalendarPage> {
   void _updateWorkedDay(DateTime day) async {
     String dayString = day.toIso8601String().split('T')[0];
     bool isWorked = _workedDays[dayString] ?? false;
-
     if (isWorked) {
       _workedDays.remove(dayString);
     } else {
       _workedDays[dayString] = true;
     }
-
     await _firestore
         .collection('users')
         .doc(widget.userId)
@@ -517,8 +496,7 @@ class CalendarPageState extends State<CalendarPage> {
         .update({
       'workedDays': _workedDays,
     });
-
-    setState(() {}); // Rebuild the UI to reflect changes
+    setState(() {});
   }
 
   @override
@@ -529,7 +507,6 @@ class CalendarPageState extends State<CalendarPage> {
         children: [
           SizedBox(
             width: double.maxFinite,
-            //   height: double.maxFinite,
             child: TableCalendar(
               firstDay: DateTime.utc(2024, 1, 1),
               lastDay: DateTime.utc(2028, 12, 31),
@@ -571,7 +548,7 @@ class CalendarPageState extends State<CalendarPage> {
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green, // Matn rangini o'zgartiring
+                    color: Colors.green,
                   ),
                 ),
                 const TextSpan(
